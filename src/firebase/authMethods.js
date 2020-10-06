@@ -3,8 +3,9 @@ import firebase from 'firebase'
 
 export const authMethods = {
 
-    signupWithEmail: (email, password, setErrors, setToken) => {
-        firebase.auth().createUserWithEmailAndPassword(email, password)
+    signupWithEmail: async (setToken, setUser, email, password) => {
+        let response;
+        await firebase.auth().createUserWithEmailAndPassword(email, password)
             //make res asynchronous so that we can make grab the token before saving it.
             .then(async res => {
                 const token = await Object.entries(res.user)[5][1].b
@@ -12,39 +13,77 @@ export const authMethods = {
                 await localStorage.setItem('token', token)
                 //grab token from local storage and set to state. 
                 setToken(window.localStorage.token)
-                console.log(res)
+                setUser(res.user)
+                console.log("auth token and user set")
+                response = res;
             })
             .catch(err => {
-                console.error(err);
-                setErrors(prev => ([...prev, err.message]))
+                throw (err);
             })
+        return response;
     },
-    signinWithEmail: (email, password, setErrors, setToken) => {
-        firebase.auth().signInWithEmailAndPassword(email, password)
+    signinWithEmail: async (setToken, setUser, email, password) => {
+        let response;
+        await firebase.auth().signInWithEmailAndPassword(email, password)
             .then(async res => {
                 const token = await Object.entries(res.user)[5][1].b
                 await localStorage.setItem('token', token)
                 setToken(window.localStorage.token)
-                console.log(res)
+                setUser(res.user)
+                console.log("auth token and user set")
+                response = res;
             })
             .catch(err => {
-                setErrors(prev => ([...prev, err.message]))
+                throw (err);
             })
+        return response;
     },
-    signout: (setErrors, setToken) => {
-        firebase.auth().signOut().then(res => {
+    signout: async (setToken, setUser) => {
+        await firebase.auth().signOut().then(res => {
                 //remove the token
                 localStorage.removeItem('token')
                 //set the token back to original state
                 setToken(null)
+                setUser(null)
             })
             .catch(err => {
-                setErrors(prev => ([...prev, err.message]))
                 //whether firebase does the trick or not i want my user to do there thing.
                 localStorage.removeItem('token')
                 setToken(null)
-                console.error(err.message)
+                setUser(null)
+                throw (err)
             })
+        return true;
     },
+    signInWithProvider: async (setToken, setUser, provider) => {
+        let response, authProvider;
+        switch (provider) {
+            case "facebook":
+                authProvider = new firebase.auth.FacebookAuthProvider();
+                break;
+
+            case "google":
+                authProvider = new firebase.auth.GoogleAuthProvider();
+                break;
+
+            default:
+                throw (new Error("no provider spiecified"));
+        }
+        await firebase.auth().signInWithPopup(authProvider)
+            .then(
+                async (res) => {
+                    // var token = res.credential.accessToken;
+                    const token = await Object.entries(res.user)[5][1].b
+                    await localStorage.setItem('token', token)
+                    setToken(window.localStorage.token)
+                    setUser(res.user)
+                    console.log("auth token and user set")
+                    response = res;
+                })
+            .catch(err => {
+                throw (err);
+            });
+        return response;
+    }
 
 }

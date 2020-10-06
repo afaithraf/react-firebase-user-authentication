@@ -3,25 +3,15 @@ import {authMethods} from '../firebase/authMethods'
 
 const AuthProvider = (props) => {
 
-    const [inputs, setInputs] = useState({email: '', password: ''});
-    const [errors, setErrors] = useState([]);
     const [token, setToken] = useState(null);
+    const [user, setUser] = useState({});
 
-    const handleSignup = () => {
-        console.log('handleSignup')
-        authMethods.signupWithEmail(inputs.email, inputs.password, setErrors, setToken);
-        console.log(errors) 
-    }
+    const handleSignup = authMethods.signupWithEmail.bind([], setToken, setUser);
+    const handleSignin = authMethods.signinWithEmail.bind([], setToken, setUser);
+    const handleSignout = authMethods.signout.bind([], setToken, setUser);
+    const handleSocialLogin = authMethods.signInWithProvider.bind([], setToken, setUser);
 
-    const handleSignin = () => {
-      console.log('handleSignin!!!!')
-      authMethods.signinWithEmail(inputs.email, inputs.password, setErrors, setToken)
-      console.log(errors, token)
-    }
 
-    const handleSignout = () => {
-      authMethods.signout(setErrors, setToken)
-    }
   
     return (
       <firebaseAuth.Provider
@@ -31,9 +21,8 @@ const AuthProvider = (props) => {
         handleSignout,
         token,
         setToken,
-        inputs,
-        setInputs,
-        errors,
+        handleSocialLogin,
+        user
       }}>
         {props.children}
   

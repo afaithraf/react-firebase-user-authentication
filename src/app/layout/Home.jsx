@@ -3,11 +3,11 @@ import {firebaseAuth} from '../../providers/AuthProvider'
 
 const Home = (props) => {
 
-    const {handleSignout} = useContext(firebaseAuth)
+    const {handleSignout, user} = useContext(firebaseAuth)
 
   return (
-    <div>
-      only if logged
+    <div className="container">
+      <p>You can see this because you are logged in as "{user ? user.email : ""}"</p>
       <button onClick={handleSignout}>sign out </button>
     </div>
   );

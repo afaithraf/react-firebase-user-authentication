@@ -16,7 +16,6 @@ export default function App() {
     };
   });
 
-  console.log(token)
     return (
         <>
           <Switch>
