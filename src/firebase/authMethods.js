@@ -1,8 +1,24 @@
 import firebaseconfig from './index'
 import firebase from 'firebase'
 
-export const authMethods = {
 
+export const authMethods = {
+    sendPasswordReset: (email) => {
+        firebase.auth().sendPasswordResetEmail(email).then(function () {
+            console.log("reset email sent");
+        }).catch((error) => {
+            console.log("err", error);
+        });
+    },
+    verifyEmail: () => {
+        firebase.auth().currentUser.sendEmailVerification()
+            .then(function () {
+                console.log("Verification email sent");
+            })
+            .catch(function (error) {
+                console.log("err", error);
+            });
+    },
     signupWithEmail: async (setToken, setUser, email, password) => {
         let response;
         await firebase.auth().createUserWithEmailAndPassword(email, password)
@@ -84,6 +100,17 @@ export const authMethods = {
                 throw (err);
             });
         return response;
+    },
+    getCurrentUser: (setToken, setUser) => {
+        firebase.auth().onAuthStateChanged((user) => {
+            if (user) {
+                setUser(user);
+            } else {
+                localStorage.removeItem('token')
+                setToken(null)
+                setUser(null)
+            }
+        });
     }
 
 }

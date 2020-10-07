@@ -11,6 +11,10 @@ const AuthProvider = (props) => {
     const handleSignout = authMethods.signout.bind([], setToken, setUser);
     const handleSocialLogin = authMethods.signInWithProvider.bind([], setToken, setUser);
 
+    const verifyEmail = authMethods.verifyEmail.bind([]);
+    const sendPasswordReset = authMethods.sendPasswordReset.bind([]);
+
+    const getCurrentUser = authMethods.getCurrentUser.bind([], setToken, setUser);
 
   
     return (
@@ -19,10 +23,13 @@ const AuthProvider = (props) => {
         handleSignup,
         handleSignin,
         handleSignout,
+        handleSocialLogin,
+        verifyEmail,
+        sendPasswordReset,
         token,
         setToken,
-        handleSocialLogin,
-        user
+        user,
+        getCurrentUser,
       }}>
         {props.children}
   

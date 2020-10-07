@@ -1,11 +1,13 @@
 import React, { useContext, useState } from 'react';
 import { firebaseAuth } from '../../providers/AuthProvider'
 import { withRouter } from 'react-router-dom'
+import ProgressButton from 'react-progress-button'
+import 'react-progress-button/react-progress-button.css';
 
 const Signin = (props) => {
   const { handleSignin, handleSocialLogin } = useContext(firebaseAuth);
 
-  const [loading, setLoading] = useState(0);
+  const [formState, setFormState] = useState('');
   const [inputs, setInputs] = useState({ email: '', password: '' });
   const [error, setError] = useState(null);
 
@@ -13,7 +15,7 @@ const Signin = (props) => {
   const handleSubmit = async (e) => {
     e.preventDefault()
     console.log('executing:', 'Signin>handleSubmit');
-    setLoading(1);
+    setFormState('loading');
     await handleSignin(inputs.email, inputs.password).then((res) => {
       handleSuccess(res);
     }).catch((err) => {
@@ -29,11 +31,14 @@ const Signin = (props) => {
   const handleSuccess = (res) => {
     console.log('executing:', 'Signin>handleSuccess');
     console.log("Signin Success: ", res);
-    props.history.push('/')
+    setFormState('success');
+    setTimeout(() => {
+      props.history.push('/')
+    }, 500);
   }
   const handleError = (err) => {
     console.log('executing:', 'Signin>handleError');
-    setLoading(0);
+    setFormState('error');
     setError(err.message);
     console.log("Error:", err);
   }
@@ -52,32 +57,26 @@ const Signin = (props) => {
     })
   }
 
-  if (loading) {
-    return (
-      <div className="form">
-        <h1>Loading</h1>
+  return (
+    <div className="form">
+      <h1>Login</h1>
+      <form className="register-form" onSubmit={handleSubmit}>
+        <input type="text" placeholder="email address" name="email" onChange={handleChange} value={inputs.email} required/>
+        <input type="password" placeholder="password" name="password" onChange={handleChange} value={inputs.password} required/>
+        {error !== null ? <p className="error-text">{error}</p> : null}
+        <ProgressButton type="submit" state={formState} controlled={true}>
+          Login
+        </ProgressButton>
+        <p className="message"><a href="/signup">Sign Up</a> |  <a href="resetpassword">Forgot password?</a></p>
+      </form>
+      <h4>Or</h4>
+      <div className="social">
+        <button className="facebook" onClick={handleFbLogin}>Continue with Facebook</button>
+        <button className="google" onClick={handleGGLogin}>Continue with Google</button>
       </div>
-    )
-  } else {
-    return (
-      <div className="form">
-        <h1>Login</h1>
-        <form className="register-form" onSubmit={handleSubmit}>
-          <input type="text" placeholder="email address" name="email" onChange={handleChange} value={inputs.email} />
-          <input type="password" placeholder="password" name="password" onChange={handleChange} value={inputs.password} />
-          {error !== null ? <p className="error">{error}</p> : null}
-          <button type="submit">Login</button>
-          <p className="message">Not registred? <a href="/signup">Sign Up</a></p>
-        </form>
-        <h4>Or</h4>
-        <div className="social">
-          <button className="facebook" onClick={handleFbLogin}>Continue with Facebook</button>
-          <button className="google" onClick={handleGGLogin}>Continue with Google</button>
-        </div>
-      </div>
-    );
-  }
-};
+    </div>
+  );
+}
 
 export default withRouter(Signin);
 
